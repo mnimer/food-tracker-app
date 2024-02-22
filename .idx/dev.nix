@@ -3,6 +3,7 @@
   packages = [
     pkgs.flutter
     pkgs.jdk17
+    pkgs.firebase-tools
   ];
   idx.extensions = [];
   idx.previews = {

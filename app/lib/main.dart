@@ -90,19 +90,18 @@ class ThisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      restorationScopeId: 'myapp',
-      title: "My App",
+      restorationScopeId: 'foodTracker',
+      title: "Food Tracker",
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.deepPurple,
-          dividerColor: Colors.black12,
-          scaffoldBackgroundColor: Colors.white70,
-          textTheme: Theme.of(context).textTheme.apply(
-                bodyColor: Colors.black.withOpacity(.7),
-                displayColor: Colors.black.withOpacity(.7),
-              )),
+        useMaterial3: true,
+        // Define the default brightness and colors.
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blueGrey,
+          brightness: Brightness.light,
+        ),
+      ),
     );
   }
 }
