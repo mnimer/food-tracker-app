@@ -1,15 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class OpenCameraButton extends StatefulWidget {
-  const OpenCameraButton({Key? key}) : super(key: key);
+class LogFoodPictureBottomSheet extends StatefulWidget {
+  const LogFoodPictureBottomSheet({Key? key}) : super(key: key);
 
   @override
-  State<OpenCameraButton> createState() => _OpenCameraButtonState();
+  State<LogFoodPictureBottomSheet> createState() => _LogFoodPictureBottomSheetState();
 }
 
-class _OpenCameraButtonState extends State<OpenCameraButton> {
+class _LogFoodPictureBottomSheetState extends State<LogFoodPictureBottomSheet> {
+
+  final ImagePicker picker = ImagePicker();
+  XFile? image;
+
   @override
   Widget build(BuildContext context) {
-    return Text('todo: take pic of food');
+    return  Row(
+      children: [
+        OutlinedButton(onPressed: () async {
+          image = await picker.pickImage(source: ImageSource.gallery);
+          if (image != null) {
+            print(image!.path);
+          }
+        },
+       child: const Text('pick image'),),
+       Builder(
+        builder: (context) {
+          if( image == null ){
+            //return const Text('');
+          }
+
+          return Text(image?.path ?? '');
+        }
+       )
+      ],
+    );
   }
 }

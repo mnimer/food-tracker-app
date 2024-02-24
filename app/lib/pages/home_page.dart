@@ -1,6 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:list_collections/widgets/log_food_picture_bottom_sheet.dart';
+import 'package:list_collections/widgets/log_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,8 +17,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference logs = FirebaseFirestore.instance.collection('logs');
-
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -61,35 +61,11 @@ class _HomePageState extends State<HomePage> {
                         ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height - 280,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: TabBarView(children: [
-                              FutureBuilder<QuerySnapshot>(
-                                future: logs
-                                    .where('user_id',
-                                        isEqualTo: FirebaseAuth
-                                            .instance.currentUser?.uid)
-                                    .get(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return const Text("Something went wrong");
-                                  }
-                                  if (!snapshot.hasData) {
-                                    return const Text("No data available");
-                                  }
-
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    for (var doc in snapshot.data!.docs) {
-                                      const Text('item');
-                                    }
-                                  }
-
-                                  return const Text("loading");
-                                },
-                              ),
-                              const Text('todo'),
+                              LogList(),
+                              Text('todo'),
                             ]),
                           ),
                         )
@@ -105,18 +81,8 @@ class _HomePageState extends State<HomePage> {
             return Container(
               height: 200,
               color: Colors.amber,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text('Modal BottomSheet'),
-                    ElevatedButton(
-                      child: const Text('Close BottomSheet'),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
+              child: const Center(
+                child: LogFoodPictureBottomSheet()
               ),
             );
           },
