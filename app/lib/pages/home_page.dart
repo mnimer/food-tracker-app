@@ -17,7 +17,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -45,9 +44,7 @@ class _HomePageState extends State<HomePage> {
                             child: SizedBox(
                           width: MediaQuery.of(context).size.width - 16,
                           height: 150,
-                          child: const Center(
-                              child: OutlinedButton(
-                                  onPressed: null, child: Text("Link Dexcom"))),
+                          child: const Center(child: OutlinedButton(onPressed: null, child: Text("Link Dexcom"))),
                         )),
                       ),
                     ),
@@ -60,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                         SizedBox(
-                          height: MediaQuery.of(context).size.height - 280,
+                          height: MediaQuery.of(context).size.height - 320,
                           child: const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: TabBarView(children: [
@@ -79,11 +76,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (BuildContext context) {
             return Container(
-              height: 200,
-              color: Colors.amber,
-              child: const Center(
-                child: LogFoodPictureBottomSheet()
-              ),
+              height: 400,
+              child: const Center(child: LogFoodPictureBottomSheet()),
             );
           },
         ),
