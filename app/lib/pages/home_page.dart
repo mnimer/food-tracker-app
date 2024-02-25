@@ -1,7 +1,7 @@
+import 'package:food_tracker/widgets/log_food_picture_bottom_sheet.dart';
+import 'package:food_tracker/widgets/log_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:list_collections/widgets/log_food_picture_bottom_sheet.dart';
-import 'package:list_collections/widgets/log_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Food Tracker"),
         actions: [
-          OutlinedButton(
-            child: const Text('Logout'),
+          IconButton(
+            icon: const Icon(Icons.logout),
             onPressed: () => {FirebaseAuth.instance.signOut()},
           )
         ],
@@ -56,8 +56,8 @@ class _HomePageState extends State<HomePage> {
                             Tab(child: Text('Macros')),
                           ],
                         ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height - 320,
+                        Container(
+                          height: 500,
                           child: const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: TabBarView(children: [
@@ -75,8 +75,9 @@ class _HomePageState extends State<HomePage> {
         onPressed: () => showModalBottomSheet<void>(
           context: context,
           builder: (BuildContext context) {
-            return Container(
+            return SizedBox(
               height: 400,
+              width: MediaQuery.of(context).size.width,
               child: const Center(child: LogFoodPictureBottomSheet()),
             );
           },

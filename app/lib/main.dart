@@ -1,11 +1,11 @@
+import 'package:food_tracker/pages/home_page.dart';
+import 'package:food_tracker/pages/splash_page.dart';
+import 'package:food_tracker/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:list_collections/firebase_options.dart';
-import 'package:list_collections/pages/home_page.dart';
-import 'package:list_collections/pages/splash_page.dart';
 
 final _key = GlobalKey<NavigatorState>();
 
