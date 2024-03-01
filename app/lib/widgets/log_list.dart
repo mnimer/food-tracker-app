@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_tracker/pages/meal_details_page.dart';
 
 class LogList extends StatelessWidget {
   const LogList({super.key, this.days = 1, required this.date});
@@ -76,7 +77,14 @@ class LogList extends StatelessWidget {
                     ),
                     child: SizedBox(width: 75, child: Image.network(doc['downaloadUrl'], fit: BoxFit.cover)),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios),
+                  trailing: IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MealDetailsPage(doc: doc)),
+                        );
+                      }),
                 );
               },
             );
