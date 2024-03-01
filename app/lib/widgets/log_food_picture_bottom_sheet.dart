@@ -5,9 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 class LogFoodPictureBottomSheet extends StatefulWidget {
-  const LogFoodPictureBottomSheet({super.key});
+  const LogFoodPictureBottomSheet({super.key, required this.date});
+
+  final DateTime date;
 
   @override
   State<LogFoodPictureBottomSheet> createState() => _LogFoodPictureBottomSheetState();
@@ -28,23 +32,27 @@ class _LogFoodPictureBottomSheetState extends State<LogFoodPictureBottomSheet> {
     try {
       if (selectedImage != null && uid != null) {
         //Upload file
-        final userFolderRef = storageRef.child('activity_logs/$uid/${selectedImage!.name}');
+        var path = 'food_logs/$uid/${selectedImage!.name}';
+        final userFolderRef = storageRef.child(path);
         var task = await userFolderRef.putFile(file);
 
         var downloadUrl = await userFolderRef.getDownloadURL();
 
         // Add Entry for File
+        DateTime now = DateTime.now();
+        DateTime dateNow =
+            DateTime(widget.date.year, widget.date.month, widget.date.day, now.hour, now.minute, now.second);
+        String id = "${DateFormat.yMMMd().format(DateTime.now())}_${const Uuid().v4()}";
         CollectionReference logs = firestore.collection("food_logs");
-        DocumentReference doc = await logs.doc(uid).collection("activity").add({
+        await logs.doc(uid).collection("activity").doc(id).set({
           'type': 'image',
-          'name': nameFieldController.text,
+          'name': '',
           'storagePath': task.ref.fullPath,
           'downaloadUrl': downloadUrl,
           'description': '',
-          'log_date': DateTime.timestamp()
+          'log_date': Timestamp.fromDate(dateNow),
+          'status': 'complete'
         });
-
-        print(doc);
 
         if (context.mounted) {
           Navigator.pop(context);
@@ -109,14 +117,6 @@ class _LogFoodPictureBottomSheetState extends State<LogFoodPictureBottomSheet> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Add TextFormFields and ElevatedButton here.
-                  TextFormField(
-                    controller: nameFieldController,
-                    decoration: const InputDecoration(labelText: 'Meal Name'),
-                    validator: (value) {
-                      return null;
-                    },
-                  ),
                   ElevatedButton(
                       onPressed: selectedImage != null
                           ? () {

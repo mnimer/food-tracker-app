@@ -47,6 +47,9 @@ dependencies:
   firebase_ui_auth: ^1.12.1
   cloud_firestore: ^4.15.5
   firebase_storage: ^11.6.6
+  collection: ^1.18.0
+  intl: ^0.18.1
+  uuid: ^4.3.3
 
 
 dev_dependencies:

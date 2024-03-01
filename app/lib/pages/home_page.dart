@@ -1,7 +1,8 @@
-import 'package:food_tracker/widgets/log_food_picture_bottom_sheet.dart';
-import 'package:food_tracker/widgets/log_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_tracker/widgets/log_food_picture_bottom_sheet.dart';
+import 'package:food_tracker/widgets/log_list.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,9 @@ class _HomePageState extends State<HomePage> {
     await Future.delayed(const Duration(seconds: 1));
     setState(() {});
   }
+
+  DateTime date = DateTime.now();
+  int duration = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,27 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          setState(() {
+                            date = date.subtract(Duration(days: duration));
+                          });
+                        },
+                      ),
+                      Text(DateFormat.yMMMd().format(date)),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios),
+                        onPressed: () {
+                          if (date.difference(DateTime.now()).inDays < 0) {
+                            setState(() {
+                              date = date.add(Duration(days: duration));
+                            });
+                          }
+                        },
+                      ),
+                    ]),
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -58,11 +83,11 @@ class _HomePageState extends State<HomePage> {
                         ),
                         Container(
                           height: 500,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: TabBarView(children: [
-                              LogList(),
-                              Text('todo'),
+                              LogList(days: 1, date: date),
+                              const Text('todo'),
                             ]),
                           ),
                         )
@@ -78,7 +103,7 @@ class _HomePageState extends State<HomePage> {
             return SizedBox(
               height: 400,
               width: MediaQuery.of(context).size.width,
-              child: const Center(child: LogFoodPictureBottomSheet()),
+              child: Center(child: LogFoodPictureBottomSheet(date: date)),
             );
           },
         ),
