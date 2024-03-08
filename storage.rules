@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+    match /food_logs/{userId}/{documents=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+//request.auth != null && request.auth.uid == userId
