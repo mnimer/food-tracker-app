@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_tracker/widgets/cgm_login.dart';
 import 'package:food_tracker/widgets/log_food_picture_bottom_sheet.dart';
 import 'package:food_tracker/widgets/log_list.dart';
 import 'package:intl/intl.dart';
@@ -11,9 +12,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
   Future<void> refreshData() async {
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {});
+    //await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      date = DateTime.now();
+    });
   }
 
   DateTime date = DateTime.now();
@@ -33,6 +38,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: RefreshIndicator(
+          key: _refreshIndicatorKey,
           onRefresh: refreshData,
           child: DefaultTabController(
               length: 2,
@@ -62,17 +68,7 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                     ]),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                            child: SizedBox(
-                          width: MediaQuery.of(context).size.width - 16,
-                          height: 150,
-                          child: const Center(child: OutlinedButton(onPressed: null, child: Text("Link Dexcom"))),
-                        )),
-                      ),
-                    ),
+                    const CgmLogin(),
                     Column(
                       children: [
                         const TabBar(

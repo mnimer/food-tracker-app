@@ -75,3 +75,9 @@ var foodTriggers = require("./triggers/foodImageTriggers.js");
 foodTriggers.init(_firestore, _storage)
 exports.onFoodActivityCreateHandler = foodTriggers.onFoodActivityCreateHandler;
 
+
+var dexcomEndpoints = require("./endpoints/dexcom.js");
+dexcomEndpoints.init(_firestore)
+exports.getDexcomToken = dexcomEndpoints.getDexcomToken;
+exports.getDexcomReadings = dexcomEndpoints.getDexcomReadings;
+

@@ -79,8 +79,12 @@ module.exports = {
     //todo get coach from user;
     //todo pull from coaches collection
     const coachBackStory = "You are a trained nutritionist focused on helping people reverse or prevent metabolic syndrome and insulin resistance. Your goal is to help people avoid sugars and food that spikes insulin, like carbs. What do you think of this dish?";
-    const goodImageInstructions = "If this is an image of food, give me a descriptive short title for this dish? Give me a list of the ingredients and their serving size? give me the macro nutrients for this dish as well?";
-    const badImageInstructions = "If it is not food or you can not figure out what it is, return \"unknown\" as the title";
+    const goodImageInstructions = "If this is an image of food, \n" + 
+      "-Create a short title to describe this dish \n  " +
+      "-Create a description of this dish \n  " +
+      "-Create a list of the ingredients and their serving size \n " +
+      "-Create a list of nutients (Calories, Protein, Carbs, Sugar, and Fat) for the ingredients of this dish \n";
+    const badImageInstructions = "If it is not food or you can not figure out what it is, return \"unknown\" as the title in the json";
 
     const req = {
       contents: [
@@ -88,53 +92,61 @@ module.exports = {
         parts: [
           {text: coachBackStory +"\n\n" +goodImageInstructions +"\n\n" +badImageInstructions },
           {inline_data: {mime_type: 'image/jpeg', data:base64String}}, 
-          {text: "return in a json format like this:\n{\"title\": \"sample title\", \n\"description\":\"Detailed description\", \n\"ingredients\": [\n  {\"name\": \"ingredient\", \"quantity\": \"1oz\"},\n  {\"name\": \"ingredient\", \"quantity\": \"2oz\"}\n], \n\"nutrients\": [\n  {\"name\", \"nutrient\", \"quantity\": \"1g\"},\n{\"name\", \"nutrient\", \"quantity\": \"2g\"}\n]}"}]}],
+          {text: "return results as a json object formatted like this:\n\n {\"title\": \"title\", \"description\":\"description\", \"ingredients\": [ {\"name\": \"ingredient\", \"quantity\": \"1oz\"}, {\"name\": \"ingredient\", \"quantity\": \"2oz\"}], \"nutrients\": [ {\"name\", \"nutrient\", \"quantity\": \"1g\"}, {\"name\", \"nutrient\", \"quantity\": \"2g\"} ]}"}]}],
         };
       
-    const aiResp = await generativeModel.generateContent(req);
-    
+    const aiResp = await generativeModel.generateContent(req);    
     var fullResponse = aiResp.response;
-    //logger.info('full response: ' +JSON.stringify(fullResponse));
 
-    var response = fullResponse.candidates[0].content.parts[0].text;
-    logger.info('response: ' + response);
+    try{
+      var response = fullResponse.candidates[0].content.parts[0].text;
+      logger.info('response: ' + response);
 
-    var title = response;
-    var description = "";
-    var ingredients = [];
-    var nutrients = [];
-    var responseStr = response.trim();
-    //check for markup around result
-    if( responseStr.startsWith("```") && responseStr.endsWith("```") ){
-      var start = responseStr.indexOf("{");
-      var end = responseStr.lastIndexOf("}");
-      responseStr = responseStr.substring(start, end+1);
+      var title = response;
+      var description = "";
+      var ingredients = [];
+      var nutrients = [];
+      var responseStr = response.trim();
+      //check for markup around result
+      if( responseStr.startsWith("```") && responseStr.endsWith("```") ){
+        var start = responseStr.indexOf("{");
+        var end = responseStr.lastIndexOf("}");
+        responseStr = responseStr.substring(start, end+1);
+      }
+
+      if( responseStr.startsWith("{") && responseStr.endsWith("}")){
+        var respomseParse = JSON.parse(responseStr);
+        title = respomseParse.title;
+        description = respomseParse.description;
+        ingredients = respomseParse.ingredients;
+        nutrients = respomseParse.nutrients;
+        logger.info("title=" +title +" | description=" +description);
+      }else{
+        logger.info("title=" +title );
+      }
+
+
+      //Save results
+      context.data.ref.update({
+        "name": title,
+        "description": description,
+        "ingredients": ingredients,
+        "nutrients": nutrients,
+        "ai_response": JSON.stringify(fullResponse),
+        "ai_datetime": new Date().getTime(),
+        "status": "complete",
+      });
+      //"ingredients": respomseParse.ingredients,
+      //"nutrients": respomseParse.nutrients
+    } catch( err ){
+      logger.info('Error: ' +err);
+      logger.info('API Response: ' +JSON.stringify(fullResponse));
+
+      context.data.ref.update({
+        "name": 'unknown',
+        "status": "complete",
+      });
     }
-
-    if( responseStr.startsWith("{") && responseStr.endsWith("}")){
-      var respomseParse = JSON.parse(responseStr);
-      title = respomseParse.title;
-      description = respomseParse.description;
-      ingredients = respomseParse.ingredients;
-      nutrients = respomseParse.nutrients;
-      logger.info("title=" +title +" | description=" +description);
-    }else{
-      logger.info("title=" +title );
-    }
-
-
-    //Save results
-    context.data.ref.update({
-      "name": title,
-      "description": description,
-      "ingredients": ingredients,
-      "nutrients": nutrients,
-      "ai_response": JSON.stringify(fullResponse),
-      "ai_datetime": new Date().getTime(),
-      "status": "complete",
-    });
-    //"ingredients": respomseParse.ingredients,
-    //"nutrients": respomseParse.nutrients
 
   })
 }

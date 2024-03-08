@@ -76,7 +76,7 @@ class _LogFoodPictureBottomSheetState extends State<LogFoodPictureBottomSheet> {
         IconButton(
           icon: const Icon(Icons.camera),
           onPressed: () async {
-            var image = await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
+            var image = await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
             if (image != null) {
               setState(() {
                 selectedImage = image;
@@ -87,7 +87,7 @@ class _LogFoodPictureBottomSheetState extends State<LogFoodPictureBottomSheet> {
         IconButton(
           icon: const Icon(Icons.photo),
           onPressed: () async {
-            var image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+            var image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
             if (image != null) {
               setState(() {
                 selectedImage = image;
