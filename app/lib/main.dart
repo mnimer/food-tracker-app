@@ -1,10 +1,11 @@
-import 'package:food_tracker/pages/home_page.dart';
-import 'package:food_tracker/pages/splash_page.dart';
-import 'package:food_tracker/firebase_options.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_tracker/firebase_options.dart';
+import 'package:food_tracker/pages/home_page.dart';
+import 'package:food_tracker/pages/splash_page.dart';
 import 'package:go_router/go_router.dart';
 
 final _key = GlobalKey<NavigatorState>();
@@ -29,6 +30,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await FirebaseAppCheck.instance.activate(
+    // Set androidProvider to `AndroidProvider.debug`
+    androidProvider: AndroidProvider.debug,
+    //a24c89c8-3f17-47b0-8b06-222f25800a0d
+  );
   runApp(ThisApp());
 }
 

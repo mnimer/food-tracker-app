@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io' show HttpServer;
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
-import 'package:http/http.dart' as http;
 
 const html = """
 <!DOCTYPE html>
@@ -21,6 +21,24 @@ const html = """
 <body>
   <main>
     <div id="text">You are logged in, please close this window</div>
+  </main>
+</body>
+</html>
+""";
+const errorHtml = """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Access Granted</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+  setTimeout("window.close()", 100);
+</script>
+</head>
+<body>
+  <main>
+    <div id="text">Error with Authentication, close browser and try again. If problem persist contact support.</div>
   </main>
 </body>
 </html>
@@ -51,22 +69,26 @@ class _CgmLoginState extends State<CgmLogin> {
         if (error != null) {
           //todo show error html
         } else {
-          var tokenUrl = 'https://getdexcomtoken-xor7ewnbbq-uc.a.run.app/getDexcomToken?code=$code&state=$state';
-          var response = await http.get(Uri.parse(tokenUrl));
+          try {
+            //Call to get Access_token.  Cloud Function will update user with OAUTH details
+            HttpsCallable callable = FirebaseFunctions.instance.httpsCallable("getDexcomToken");
+            final response = await callable({"code": code, "state": state});
 
-          if (response.statusCode == 200) {
-            var token = response.body;
+            //var tokenUrl = 'https://getdexcomtoken-xor7ewnbbq-uc.a.run.app/getDexcomToken?code=$code&state=$state';
+            //var response = await http.get(Uri.parse(tokenUrl));
+
+            var token = await response.data;
+            debugPrint(token);
 
             req.response.headers.add('Content-Type', 'text/html');
             req.response.write(html);
             req.response.close();
-          } else {
-            var body = response.body;
-            var body2 = response.bodyBytes;
-            print("${response.statusCode} | $body");
+          } catch (err) {
+            debugPrint("$err");
+            req.response.headers.add('Content-Type', 'text/html');
+            req.response.write(errorHtml);
+            req.response.close();
           }
-
-          //Call to get Access_token
         }
       }
     });
@@ -77,20 +99,18 @@ class _CgmLoginState extends State<CgmLogin> {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     //https://api.dexcom.com
     var redirectUrl = "http://127.0.0.1:43823";
+    var host = "https://api.dexcom.com";
+    host = "https://sandbox-api.dexcom.com";
     var url =
-        "https://sandbox-api.dexcom.com/v2/oauth2/login?client_id=$clientId&redirect_uri=$redirectUrl&response_type=code&scope=offline_access&state=$uid";
+        "$host/v2/oauth2/login?client_id=$clientId&redirect_uri=$redirectUrl&response_type=code&scope=offline_access&state=$uid";
 
     var callbackUrlScheme = 'foobar';
 
     try {
       final result = await FlutterWebAuth.authenticate(url: url, callbackUrlScheme: callbackUrlScheme);
-      setState(() {
-        print('Got result: $result');
-      });
+      //debugPrint('Got result: $result');
     } on PlatformException catch (e) {
-      setState(() {
-        print('Got error: $e');
-      });
+      debugPrint('Got error: $e');
     }
   }
 
