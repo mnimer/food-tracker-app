@@ -43,13 +43,13 @@ class LogList extends StatelessWidget {
                 var protein = nutrients.firstWhere((e) => e['name'] == "Protein", orElse: () => '');
                 var calories = nutrients.firstWhere((e) => e['name'] == "Calories", orElse: () => '');
                 return ListTile(
+                  dense: true,
                   title: Text(doc['name'] ?? ''),
                   subtitle: (doc['status'] == "processing")
                       ? Container(width: 44, height: 44, child: const CircularProgressIndicator())
-                      : Column(children: [
+                      : Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           Text(
                             doc['description'] ?? '',
-                            textScaler: const TextScaler.linear(.9),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 3,
                             softWrap: true,

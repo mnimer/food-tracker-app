@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -56,40 +55,18 @@ class _DexcomChartState extends State<DexcomChart> {
     });
   }
 
-  Future<void> getLatestDexcomReadings() async {
-    HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('getDexcomReadings');
-    await callable({"uid": widget.user['uid']});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
         child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(0),
             child: Card(
-                child: Column(children: [
-              isLoading
-                  ? Container(width: 25, height: 25, child: const CircularProgressIndicator())
-                  : IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () async {
-                        String? uid = FirebaseAuth.instance.currentUser?.uid;
-                        if (uid != null) {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          HttpsCallable callable = FirebaseFunctions.instance.httpsCallable("getDexcomReadings");
-                          await callable({"uid": uid});
-                          //debugPrint(response.data);
-                          setState(() {
-                            isLoading = false;
-                          });
-                        }
-                      }),
-              Container(
-                  width: 400,
-                  height: 175,
-                  child: SfCartesianChart(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Expanded(
+                      child: SfCartesianChart(
                     primaryYAxis: const NumericAxis(
                       anchorRangeToVisiblePoints: true,
                     ),
@@ -110,6 +87,6 @@ class _DexcomChartState extends State<DexcomChart> {
                     ],
                     zoomPanBehavior: ZoomPanBehavior(enablePanning: true, enablePinching: true, zoomMode: ZoomMode.x),
                   ))
-            ]))));
+                ]))));
   }
 }

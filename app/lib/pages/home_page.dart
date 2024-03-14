@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_tracker/widgets/cgm_login.dart';
@@ -19,7 +20,10 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _user;
 
   Future<void> refreshData() async {
-    //await Future.delayed(const Duration(seconds: 1));
+    User? authUser = FirebaseAuth.instance.currentUser;
+    HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('getDexcomReadings');
+    await callable({"uid": authUser!.uid});
+
     setState(() {
       date = DateTime.now();
     });
@@ -62,68 +66,61 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              key: _refreshIndicatorKey,
-              onRefresh: refreshData,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        onPressed: () {
+          : DefaultTabController(
+              length: 2,
+              child: RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: refreshData,
+                child: ListView(padding: const EdgeInsets.all(0), children: <Widget>[
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      onPressed: () {
+                        setState(() {
+                          date = date.subtract(Duration(days: duration));
+                        });
+                      },
+                    ),
+                    Text(DateFormat.yMMMd().format(date)),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: () {
+                        if (date.difference(DateTime.now()).inDays < 0) {
                           setState(() {
-                            date = date.subtract(Duration(days: duration));
+                            date = date.add(Duration(days: duration));
                           });
-                        },
-                      ),
-                      Text(DateFormat.yMMMd().format(date)),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          if (date.difference(DateTime.now()).inDays < 0) {
-                            setState(() {
-                              date = date.add(Duration(days: duration));
-                            });
-                          }
-                        },
-                      ),
-                    ]),
-                    SizedBox(
-                        width: MediaQuery.of(context).size.width - 16,
-                        height: 250,
+                        }
+                      },
+                    ),
+                  ]),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: 200,
                         child: (!_user!.containsKey("dexcom") || _user!['dexcom']['login_required'])
                             ? const CgmLogin()
-                            : SizedBox(height: 150, child: DexcomChart(user: _user!, date: date))),
-                    DefaultTabController(
-                        length: 2,
-                        child: SizedBox(
-                            width: MediaQuery.of(context).size.width - 16,
-                            height: 430,
-                            child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-                              const TabBar(
-                                tabs: [
-                                  Tab(child: Text('Log')),
-                                  Tab(child: Text('Macros')),
-                                ],
-                              ),
-                              Container(
-                                height: 500,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TabBarView(children: [
-                                    LogList(days: 1, date: date),
-                                    const Text('todo'),
-                                  ]),
-                                ),
-                              )
-                            ]))),
-                  ],
-                ),
-              ),
-            ),
+                            : DexcomChart(user: _user!, date: date)),
+                  ),
+                  const TabBar(
+                    tabs: [
+                      Tab(child: Text('Log')),
+                      Tab(child: Text('Macros')),
+                    ],
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: 600,
+                    child: Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: TabBarView(children: [
+                        LogList(days: 1, date: date),
+                        const Text('todo'),
+                      ]),
+                    ),
+                  )
+                ]),
+              )),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showModalBottomSheet<void>(
           context: context,
