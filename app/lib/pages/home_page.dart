@@ -32,8 +32,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    //Load Authenticated User object
-    User? authUser = FirebaseAuth.instance!.currentUser;
+    //Listen to Authenticated User object
+    User? authUser = FirebaseAuth.instance.currentUser;
     if (authUser != null) {
       Stream<DocumentSnapshot<Map<String, dynamic>>> user =
           FirebaseFirestore.instance.collection("users").doc(authUser.uid).snapshots();
@@ -65,60 +65,65 @@ class _HomePageState extends State<HomePage> {
           : RefreshIndicator(
               key: _refreshIndicatorKey,
               onRefresh: refreshData,
-              child: DefaultTabController(
-                  length: 2,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_ios),
-                            onPressed: () {
-                              setState(() {
-                                date = date.subtract(Duration(days: duration));
-                              });
-                            },
-                          ),
-                          Text(DateFormat.yMMMd().format(date)),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_forward_ios),
-                            onPressed: () {
-                              if (date.difference(DateTime.now()).inDays < 0) {
-                                setState(() {
-                                  date = date.add(Duration(days: duration));
-                                });
-                              }
-                            },
-                          ),
-                        ]),
-                        (!_user!.containsKey("dexcom") || _user!['dexcom']['login_required'])
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          setState(() {
+                            date = date.subtract(Duration(days: duration));
+                          });
+                        },
+                      ),
+                      Text(DateFormat.yMMMd().format(date)),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios),
+                        onPressed: () {
+                          if (date.difference(DateTime.now()).inDays < 0) {
+                            setState(() {
+                              date = date.add(Duration(days: duration));
+                            });
+                          }
+                        },
+                      ),
+                    ]),
+                    SizedBox(
+                        width: MediaQuery.of(context).size.width - 16,
+                        height: 250,
+                        child: (!_user!.containsKey("dexcom") || _user!['dexcom']['login_required'])
                             ? const CgmLogin()
-                            : DexcomChart(user: _user!),
-                        Column(
-                          children: [
-                            const TabBar(
-                              tabs: [
-                                Tab(child: Text('Log')),
-                                Tab(child: Text('Macros')),
-                              ],
-                            ),
-                            Container(
-                              height: 500,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TabBarView(children: [
-                                  LogList(days: 1, date: date),
-                                  const Text('todo'),
-                                ]),
+                            : SizedBox(height: 150, child: DexcomChart(user: _user!, date: date))),
+                    DefaultTabController(
+                        length: 2,
+                        child: SizedBox(
+                            width: MediaQuery.of(context).size.width - 16,
+                            height: 430,
+                            child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+                              const TabBar(
+                                tabs: [
+                                  Tab(child: Text('Log')),
+                                  Tab(child: Text('Macros')),
+                                ],
                               ),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ))),
+                              Container(
+                                height: 500,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TabBarView(children: [
+                                    LogList(days: 1, date: date),
+                                    const Text('todo'),
+                                  ]),
+                                ),
+                              )
+                            ]))),
+                  ],
+                ),
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showModalBottomSheet<void>(
           context: context,

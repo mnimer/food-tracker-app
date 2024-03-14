@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:cron/cron.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
@@ -36,6 +39,19 @@ void main() async {
     //a24c89c8-3f17-47b0-8b06-222f25800a0d
   );
   runApp(ThisApp());
+
+  final cron = Cron();
+  cron.schedule(Schedule.parse('*/5 * * * *'), () async {
+    debugPrint('every 5 minutes');
+
+    var firestore = FirebaseFirestore.instance;
+    String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      HttpsCallable callable = FirebaseFunctions.instance.httpsCallable("getDexcomReadings");
+      callable({"uid": uid});
+      //debugPrint(response.data);
+    }
+  });
 }
 
 /// Starting Root Widget

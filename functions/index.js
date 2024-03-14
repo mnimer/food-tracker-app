@@ -9,7 +9,7 @@
 
 const { logger } = require("firebase-functions");
 const { functions, auth } = require("firebase-functions");
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall} = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
 // The Firebase Admin SDK to access Firestore.
@@ -25,9 +25,15 @@ const geminiApiKey = defineSecret("geminiApiKey");
 
 
 
-initializeApp();
+const admin = initializeApp();
 const _firestore = getFirestore();
 const _storage = getStorage();
+
+// if( process.env.test ){
+//     connectFirestoreEmulator(_firestore, '127.0.0.1', 8080);
+//     connectStorageEmulator(_storage, "127.0.0.1", 9199);
+//     connectFunctionsEmulator(_storage, "127.0.0.1", 5001);
+// }
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
@@ -36,16 +42,19 @@ const _storage = getStorage();
 //   response.send("Hello from Firebase!");
 // });
 
-exports.health = onRequest((request, response) => {
-    logger.info("Health Check", { structuredData: true });
-    response.send("ok");
+
+exports.health = onCall({
+    enforceAppCheck: false, // Reject requests with missing or invalid App Check tokens.
+},(request) => {
+    logger.debug("Health Check Called");
+    return "ok";
 });
 
 /**
  * User Clean Up if user is deleted
  */
 exports.onUserDeleted = auth.user().onDelete(async (user) => {
-    let firestore = admin.firestore();
+    let firestore = _firestore();
     //delete user
     let userRef = firestore.doc('users/' + user.uid);
     await firestore.collection("users").doc(user.uid).delete();
@@ -55,7 +64,7 @@ exports.onUserDeleted = auth.user().onDelete(async (user) => {
 });
 
 exports.onUserCreated = auth.user().onCreate(async (user) => {
-    let firestore = admin.firestore();
+    let firestore = _firestore();
     //delete user
     const doc = await firestore.collection("users").add(user.uid);
     await doc.add({
