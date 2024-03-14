@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,35 +40,56 @@ class LogList extends StatelessWidget {
               itemBuilder: (context, index) {
                 dynamic doc = snapshot.data!.docs[index].data();
                 var nutrients = doc['nutrients'] ?? [];
-                var carbs = nutrients.firstWhere((e) => e['name'] == "Carbohydrates", orElse: () => '');
-                var protein = nutrients.firstWhere((e) => e['name'] == "Protein", orElse: () => '');
-                var calories = nutrients.firstWhere((e) => e['name'] == "Calories", orElse: () => '');
+                var carbs = nutrients.firstWhere(
+                    (e) =>
+                        e['name'].toString().toLowerCase() == "carbohydrates" ||
+                        e['name'].toString().toLowerCase() == "carbs",
+                    orElse: () => '');
+                var protein =
+                    nutrients.firstWhere((e) => e['name'].toString().toLowerCase() == "protein", orElse: () => '');
+                var calories =
+                    nutrients.firstWhere((e) => e['name'].toString().toLowerCase() == "calories", orElse: () => '');
                 return ListTile(
-                  dense: true,
+                  titleAlignment: ListTileTitleAlignment.top,
                   title: Text(doc['name'] ?? ''),
-                  subtitle: (doc['status'] == "processing")
-                      ? Container(width: 44, height: 44, child: const CircularProgressIndicator())
-                      : Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text(
-                            doc['description'] ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            softWrap: true,
-                          ),
-                          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                            (carbs.isNotEmpty)
-                                ? SizedBox(width: 44, height: 44, child: NutrientBox(label: "Carbs", nutrient: carbs))
-                                : Container(),
-                            (protein.isNotEmpty)
-                                ? SizedBox(
-                                    width: 44, height: 44, child: NutrientBox(label: "Protein", nutrient: protein))
-                                : Container(),
-                            (calories.isNotEmpty)
-                                ? SizedBox(
-                                    width: 44, height: 44, child: NutrientBox(label: "Calories", nutrient: calories))
-                                : Container(),
-                          ])
-                        ]),
+                  subtitle: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      doc['description'] ?? '',
+                      textScaler: const TextScaler.linear(.9),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
+                      softWrap: true,
+                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                      (carbs.isNotEmpty)
+                          ? Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.blueAccent),
+                                  borderRadius: const BorderRadius.all(Radius.circular(4.0))),
+                              child: NutrientBox(label: "Carbs", nutrient: carbs))
+                          : Container(),
+                      (protein.isNotEmpty)
+                          ? Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.blueAccent),
+                                  borderRadius: const BorderRadius.all(Radius.circular(4.0))),
+                              child: NutrientBox(label: "Protein", nutrient: protein))
+                          : Container(),
+                      (calories.isNotEmpty)
+                          ? Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.blueAccent),
+                                  borderRadius: const BorderRadius.all(Radius.circular(4.0))),
+                              child: NutrientBox(label: "Calories", nutrient: calories))
+                          : Container(),
+                    ])
+                  ]),
                   leading: ConstrainedBox(
                     constraints: const BoxConstraints(
                       minWidth: 44,
@@ -75,7 +97,22 @@ class LogList extends StatelessWidget {
                       maxWidth: 64,
                       maxHeight: 64,
                     ),
-                    child: SizedBox(width: 75, child: Image.network(doc['downaloadUrl'], fit: BoxFit.cover)),
+                    child: SizedBox(
+                        width: 75,
+                        child: CachedNetworkImage(
+                          fit: BoxFit.cover,
+                          imageUrl: doc['downaloadUrl'],
+                          imageBuilder: (context, imageProvider) => Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          progressIndicatorBuilder: (context, url, downloadProgress) => const Placeholder(),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        )),
                   ),
                   trailing: IconButton(
                       icon: const Icon(Icons.arrow_forward_ios),
@@ -89,8 +126,6 @@ class LogList extends StatelessWidget {
               },
             );
           }
-
-          return Container();
         });
   }
 }
