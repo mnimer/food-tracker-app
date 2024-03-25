@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class MealDetailsPage extends StatefulWidget {
@@ -30,16 +31,40 @@ class _MealDetailsPageState extends State<MealDetailsPage> {
             child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Text(
-              widget.doc['name'],
-              textScaler: const TextScaler.linear(2),
-            ),
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: 75, child: Image.network(widget.doc['downaloadUrl'], fit: BoxFit.cover)),
-                  SizedBox(width: MediaQuery.of(context).size.width - 120, child: Text(widget.doc['description'])),
+                  SizedBox(
+                      width: 75,
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl: widget.doc['downaloadUrl'],
+                        progressIndicatorBuilder: (context, url, downloadProgress) =>
+                            const SizedBox(width: 75, height: 75, child: Placeholder()),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      )),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Column(
+                        children: [
+                          Text(
+                            widget.doc['name'],
+                            style: TextStyle(fontSize: 24),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          SizedBox(
+                              width: MediaQuery.of(context).size.width - 120,
+                              child: Text(
+                                widget.doc['description'],
+                                style: TextStyle(fontSize: 16),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
                 ]),
             Container(height: 24),
             const Text(

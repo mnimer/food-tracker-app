@@ -42,7 +42,7 @@ void main() async {
 
   final cron = Cron();
   cron.schedule(Schedule.parse('*/15 * * * *'), () async {
-    debugPrint('reload readings 15 minutes');
+    debugPrint('reload readings');
 
     var firestore = FirebaseFirestore.instance;
     String? uid = FirebaseAuth.instance.currentUser?.uid;

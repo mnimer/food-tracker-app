@@ -2,7 +2,7 @@
   channel = "stable-23.11"; # "stable-23.11" or "unstable"
   packages = [
     pkgs.flutter
-    pkgs.firebase-tools
+    pkgs.nodePackages.firebase-tools
     pkgs.jdk17
   ];
   idx.extensions = [];

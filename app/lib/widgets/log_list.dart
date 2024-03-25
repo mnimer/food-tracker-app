@@ -50,6 +50,7 @@ class LogList extends StatelessWidget {
                 var calories =
                     nutrients.firstWhere((e) => e['name'].toString().toLowerCase() == "calories", orElse: () => '');
                 return ListTile(
+                  contentPadding: const EdgeInsets.all(8),
                   titleAlignment: ListTileTitleAlignment.top,
                   title: Text(doc['name'] ?? ''),
                   subtitle: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -60,6 +61,7 @@ class LogList extends StatelessWidget {
                       maxLines: 3,
                       softWrap: true,
                     ),
+                    Container(height: 8),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                       (carbs.isNotEmpty)
                           ? Container(
